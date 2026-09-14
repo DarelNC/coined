@@ -20,11 +20,14 @@ This is the entire value proposition of Codelf. Everything else is secondary.
 ## Explicitly out of scope for v1
 
 - Query translation for non-English input — see [README.md](README.md) cut list.
-- Pagination beyond a first page of results — revisit once real usage shows it's needed.
 
 ## Language filter: built (2026-09-14)
 
 No longer out of scope — done. `?lang=` param on `/api/search`, passed through to Sourcegraph's own `lang:` query syntax. UI is a row of bracket-style toggles (`[any] [js] [ts] [py] [go] [rust] [java]`, matching the existing `[ search ]` button) rather than a `<select>` — a short, deliberately non-exhaustive list, not a full language picker. Selecting a language re-runs an active search immediately. Cache key includes `lang` so filtered and unfiltered results for the same query don't collide.
+
+## Pagination: built (2026-09-14)
+
+No longer out of scope. Deliberately **not** a second network round-trip per page — the API already fetches up to `count:100` file matches in one request (see the result-count decision above), and extraction typically yields well over 10 unique variables from that. "Load more" just reveals more of the already-fetched, already-extracted list (10 at a time), client-side, instantly. Resets to the first page whenever a new search actually runs (new query or language change). If a query is popular enough to exhaust the full fetched set, the UI just says so (`// that's everything found`) rather than silently re-fetching at a higher count — a real second fetch is a bigger decision (more upstream load) that isn't needed yet.
 
 ## Implementation notes (learned while building)
 
