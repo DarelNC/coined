@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
 const PAGE_SIZE = 10;
@@ -41,7 +41,22 @@ export default function Home() {
   const [variables, setVariables] = useState([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [errorMessage, setErrorMessage] = useState("");
+  const [copiedKeyword, setCopiedKeyword] = useState("");
+  const copyTimeoutRef = useRef(null);
   const spinner = useSpinner(status === "loading");
+
+  useEffect(() => () => clearTimeout(copyTimeoutRef.current), []);
+
+  async function copyKeyword(keyword) {
+    try {
+      await navigator.clipboard.writeText(keyword);
+    } catch {
+      return;
+    }
+    clearTimeout(copyTimeoutRef.current);
+    setCopiedKeyword(keyword);
+    copyTimeoutRef.current = setTimeout(() => setCopiedKeyword(""), 1200);
+  }
 
   async function runSearch(q, searchLang) {
     if (!q) return;
@@ -173,20 +188,31 @@ export default function Home() {
                 {variables.slice(0, visibleCount).map((v) => (
                   <li
                     key={v.keyword}
-                    className="group border-l-2 border-border pl-4 py-3 transition-colors hover:border-accent"
+                    className="group/row flex items-baseline justify-between gap-4 border-l-2 border-border pl-4 py-3 transition-colors hover:border-accent"
                   >
+                    <button
+                      onClick={() => copyKeyword(v.keyword)}
+                      title="click to copy"
+                      aria-label={
+                        copiedKeyword === v.keyword ? `${v.keyword}, copied` : `copy ${v.keyword}`
+                      }
+                      className="group/chip truncate text-lg text-foreground transition-colors hover:text-accent"
+                    >
+                      <span className="text-accent opacity-0 transition-opacity group-hover/chip:opacity-100">
+                        {"[ "}
+                      </span>
+                      {copiedKeyword === v.keyword ? "copied" : v.keyword}
+                      <span className="text-accent opacity-0 transition-opacity group-hover/chip:opacity-100">
+                        {" ]"}
+                      </span>
+                    </button>
                     <a
                       href={v.repoLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-baseline justify-between gap-4"
+                      className="shrink-0 text-xs text-muted transition-colors hover:text-accent"
                     >
-                      <span className="truncate text-lg text-foreground group-hover:text-accent">
-                        {v.keyword}
-                      </span>
-                      <span className="shrink-0 text-xs text-muted">
-                        {v.repoLang} · {v.repoList.length} repo{v.repoList.length === 1 ? "" : "s"}
-                      </span>
+                      {v.repoLang} · {v.repoList.length} repo{v.repoList.length === 1 ? "" : "s"}
                     </a>
                   </li>
                 ))}
