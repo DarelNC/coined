@@ -4,6 +4,18 @@ import { useEffect, useState } from "react";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
 
+// Sourcegraph lang: values. Kept short on purpose — a handful of common
+// languages, not an exhaustive picker.
+const LANGUAGES = [
+  { label: "any", value: "" },
+  { label: "js", value: "javascript" },
+  { label: "ts", value: "typescript" },
+  { label: "py", value: "python" },
+  { label: "go", value: "go" },
+  { label: "rust", value: "rust" },
+  { label: "java", value: "java" },
+];
+
 // Classic CLI braille spinner (npm/yarn-style) — on-brand for a terminal-ish
 // UI, and generic enough to represent "waiting on some upstream," whichever
 // source (Sourcegraph, GitHub, a future one) actually answers the request.
@@ -23,18 +35,21 @@ function useSpinner(active) {
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [lang, setLang] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | done | error
   const [variables, setVariables] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const spinner = useSpinner(status === "loading");
 
-  async function runSearch(q) {
+  async function runSearch(q, searchLang) {
     if (!q) return;
     setStatus("loading");
     setErrorMessage("");
 
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const params = new URLSearchParams({ q });
+      if (searchLang) params.set("lang", searchLang);
+      const res = await fetch(`/api/search?${params}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -53,12 +68,18 @@ export default function Home() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    runSearch(query.trim());
+    runSearch(query.trim(), lang);
   }
 
   function runExample(example) {
     setQuery(example);
-    runSearch(example);
+    runSearch(example, lang);
+  }
+
+  function selectLang(value) {
+    setLang(value);
+    // if there's an active query, re-run it immediately under the new filter
+    if (query.trim()) runSearch(query.trim(), value);
   }
 
   return (
@@ -90,6 +111,21 @@ export default function Home() {
             {status === "loading" ? `${spinner} searching` : "[ search ]"}
           </button>
         </form>
+
+        <div className="mt-3 flex gap-4">
+          {LANGUAGES.map((l) => (
+            <button
+              key={l.value}
+              onClick={() => selectLang(l.value)}
+              disabled={status === "loading"}
+              className={`text-xs transition-colors disabled:opacity-50 ${
+                lang === l.value ? "text-accent" : "text-muted hover:text-accent"
+              }`}
+            >
+              [{l.label}]
+            </button>
+          ))}
+        </div>
 
         <div className="mt-8 flex-1">
           {status === "idle" && (

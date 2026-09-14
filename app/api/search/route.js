@@ -7,19 +7,20 @@ import { getCached, setCached } from '@/lib/searchCache';
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const q = (searchParams.get('q') || '').trim();
+  const lang = (searchParams.get('lang') || '').trim();
 
   if (!q) {
     return Response.json({ error: 'Missing query parameter "q"' }, { status: 400 });
   }
 
-  const cacheKey = q.toLowerCase();
+  const cacheKey = `${q.toLowerCase()}::${lang.toLowerCase()}`;
   const cached = getCached(cacheKey);
   if (cached) {
     return Response.json({ variables: cached, cached: true });
   }
 
   try {
-    const results = await searchSourcegraph(q);
+    const results = await searchSourcegraph(q, { lang });
     const variables = extractVariables(results, q);
     setCached(cacheKey, variables);
     return Response.json({ variables });
