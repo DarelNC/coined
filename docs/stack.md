@@ -13,10 +13,10 @@ Fast to build and theme, standard pairing with Next.js, no design-system decisio
 Legacy Codelf died because its one upstream (searchcode.com's free API) got shut down with no warning and no fallback. Picking a single upstream again would just reset the clock on the same failure. Decision:
 
 - **Primary: Sourcegraph's public code-search GraphQL API.** Free, no auth/API key required for anonymous public-code search, actively maintained, covers a huge swath of public repos. This is the closest modern equivalent of what searchcode.com used to offer.
-- **Secondary/fallback: GitHub's REST code-search API**, used when a user (or eventually, our own account) supplies a personal access token — GitHub's unauthenticated code-search rate limit is too low (10 req/min) to rely on alone, but it's a legitimate second source and it's official, so it won't disappear the way a scrappy free API did.
-- The API-route proxy layer owns the decision of which upstream answers a given request and can fail over between them — this is exactly the flexibility the legacy client-only architecture didn't have.
+- **Secondary/fallback: GitHub's REST code-search API**, used only when `GITHUB_TOKEN` is configured. **Correction (2026-09-14, tested live):** the original assumption here was wrong — GitHub's code search endpoint has no anonymous access at all (confirmed: an unauthenticated request gets a flat `401 Requires authentication`, not just a low rate limit). So this fallback is opt-in by nature: without a token it's skipped entirely rather than attempted and failing. Still worth having — it's official and won't disappear the way a scrappy free API did — but it's not a safety net that works out of the box for every clone of this repo.
+- The API-route proxy layer owns the decision of which upstream answers a given request and can fail over between them (see `SOURCES` in `app/api/search/route.js`) — this is exactly the flexibility the legacy client-only architecture didn't have.
 
-**This is a first-draft decision, not locked in** — flag before scaffolding if you want to weigh alternatives (e.g. grep.app has no documented public API so it's excluded; a self-hosted search index was considered and rejected as out of scope for v1).
+Built 2026-09-14 — no longer a first-draft decision. Alternatives considered and rejected at the time: grep.app (no documented public API), a self-hosted search index (out of scope for a solo-maintained free tool).
 
 ## Caching
 

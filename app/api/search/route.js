@@ -1,8 +1,30 @@
 import { extractVariables } from '@/lib/extractVariables';
 import { searchSourcegraph } from '@/lib/sourcegraph';
+import { searchGitHub, isGitHubConfigured } from '@/lib/github';
 import { getCached, setCached } from '@/lib/searchCache';
 
-// Frontend only ever calls this route, never Sourcegraph directly — see
+// Ordered upstream sources. The route owns this decision — see
+// docs/architecture.md — so a source can be added/reordered/disabled here
+// without touching anything else.
+const SOURCES = [
+  { search: searchSourcegraph, enabled: () => true },
+  { search: searchGitHub, enabled: isGitHubConfigured },
+];
+
+async function searchAllSources(q, { lang }) {
+  let lastError;
+  for (const source of SOURCES) {
+    if (!source.enabled()) continue;
+    try {
+      return await source.search(q, { lang });
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error('No search source available');
+}
+
+// Frontend only ever calls this route, never an upstream directly — see
 // codelf/docs/rules.md (never call a third-party API from the client).
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -20,13 +42,11 @@ export async function GET(request) {
   }
 
   try {
-    const results = await searchSourcegraph(q, { lang });
+    const results = await searchAllSources(q, { lang });
     const variables = extractVariables(results, q);
     setCached(cacheKey, variables);
     return Response.json({ variables });
   } catch (err) {
-    // No secondary source wired up yet for v1 — see the open question in
-    // codelf/docs/features/variable-search.md.
     return Response.json({ error: 'Search failed, try again shortly.' }, { status: 502 });
   }
 }

@@ -29,9 +29,17 @@ No longer out of scope — done. `?lang=` param on `/api/search`, passed through
 
 No longer out of scope. Deliberately **not** a second network round-trip per page — the API already fetches up to `count:100` file matches in one request (see the result-count decision above), and extraction typically yields well over 10 unique variables from that. "Load more" just reveals more of the already-fetched, already-extracted list (10 at a time), client-side, instantly. Resets to the first page whenever a new search actually runs (new query or language change). If a query is popular enough to exhaust the full fetched set, the UI just says so (`// that's everything found`) rather than silently re-fetching at a higher count — a real second fetch is a bigger decision (more upstream load) that isn't needed yet.
 
+## GitHub fallback: built (2026-09-14)
+
+No longer a gap. `app/api/search/route.js` now tries an ordered list of sources (`SOURCES`) — Sourcegraph first, then GitHub if Sourcegraph throws — instead of having exactly one upstream, which was the legacy failure shape this whole project exists to avoid.
+
+- **GitHub only activates with `GITHUB_TOKEN` set** (see `.env.example`). Confirmed live that GitHub's code search has zero anonymous access (flat `401`, not a rate limit) — `isGitHubConfigured()` checks for the token and skips GitHub entirely if it's absent, rather than making a doomed request every search. So a fresh clone of this repo with no token configured runs Sourcegraph-only, same as before — nothing breaks, the fallback just isn't active.
+- Couldn't be tested end-to-end against real GitHub data in the environment this was built in (no token available there) — the request/response shape is implemented per GitHub's documented API and unit-tested with a mocked `fetch` (`lib/__tests__/github.test.js`), but hasn't been verified against a live authenticated response. Worth an explicit live check once a token is available.
+- `lib/languageFromPath.js` extracted as a shared util once a second upstream client needed the same path→language mapping Sourcegraph's client already had — avoids the two clients drifting out of sync.
+
 ## Implementation notes (learned while building)
 
-- Anonymous Sourcegraph GraphQL access works exactly as planned — confirmed live against `sourcegraph.com/.api/graphql` with no token, no rate-limit issues hit during v1 build/testing. GitHub fallback not needed yet; revisit if that changes.
+- Anonymous Sourcegraph GraphQL access works exactly as planned — confirmed live against `sourcegraph.com/.api/graphql` with no token, no rate-limit issues hit during v1 build/testing.
 - **Had to exclude prose files from the query** (`lib/sourcegraph.js`, `NON_CODE_FILES` constant: `-file:\.(md|mdx|txt|rst)$`). Without it, results were dominated by README/docs files that happen to mention the search term in prose, not actual variable declarations — defeats the point of "real-world code." Worth remembering if result quality regresses later: check this filter first.
 - Files: `lib/extractVariables.js` (pure, ported from legacy, unit tested in `lib/__tests__/`), `lib/sourcegraph.js` (upstream client), `lib/searchCache.js` (in-memory query cache), `app/api/search/route.js` (the proxy route — the only thing the frontend calls), `app/page.js` (search UI).
 
