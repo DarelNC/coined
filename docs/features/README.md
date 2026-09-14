@@ -2,7 +2,8 @@
 
 One file per feature. A new feature gets a new doc here and an explicit decision — see [../rules.md](../rules.md) on v1 scope.
 
-- [variable-search.md](variable-search.md) — the core feature. v1, in progress.
+- [variable-search.md](variable-search.md) — the core feature. v1, built.
+- [copy-to-clipboard.md](copy-to-clipboard.md) — click a result keyword to copy it. Built, beyond original v1 scope.
 
 ## Deliberately cut from v1 (carried over from the legacy app, not ported)
 
