@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
+const PAGE_SIZE = 10;
 
 // Sourcegraph lang: values. Kept short on purpose — a handful of common
 // languages, not an exhaustive picker.
@@ -38,6 +39,7 @@ export default function Home() {
   const [lang, setLang] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | done | error
   const [variables, setVariables] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [errorMessage, setErrorMessage] = useState("");
   const spinner = useSpinner(status === "loading");
 
@@ -59,6 +61,7 @@ export default function Home() {
       }
 
       setVariables(data.variables);
+      setVisibleCount(PAGE_SIZE);
       setStatus("done");
     } catch {
       setErrorMessage("search failed, try again.");
@@ -165,28 +168,43 @@ export default function Home() {
           )}
 
           {status === "done" && variables.length > 0 && (
-            <ul className="flex flex-col">
-              {variables.map((v) => (
-                <li
-                  key={v.keyword}
-                  className="group border-l-2 border-border pl-4 py-3 transition-colors hover:border-accent"
-                >
-                  <a
-                    href={v.repoLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-baseline justify-between gap-4"
+            <>
+              <ul className="flex flex-col">
+                {variables.slice(0, visibleCount).map((v) => (
+                  <li
+                    key={v.keyword}
+                    className="group border-l-2 border-border pl-4 py-3 transition-colors hover:border-accent"
                   >
-                    <span className="truncate text-lg text-foreground group-hover:text-accent">
-                      {v.keyword}
-                    </span>
-                    <span className="shrink-0 text-xs text-muted">
-                      {v.repoLang} · {v.repoList.length} repo{v.repoList.length === 1 ? "" : "s"}
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+                    <a
+                      href={v.repoLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-baseline justify-between gap-4"
+                    >
+                      <span className="truncate text-lg text-foreground group-hover:text-accent">
+                        {v.keyword}
+                      </span>
+                      <span className="shrink-0 text-xs text-muted">
+                        {v.repoLang} · {v.repoList.length} repo{v.repoList.length === 1 ? "" : "s"}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {visibleCount < variables.length ? (
+                <button
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  className="mt-4 text-sm text-muted transition-colors hover:text-accent"
+                >
+                  {`[ load more — ${variables.length - visibleCount} more ]`}
+                </button>
+              ) : (
+                variables.length > PAGE_SIZE && (
+                  <p className="mt-4 text-sm text-muted">{"// that's everything found"}</p>
+                )
+              )}
+            </>
           )}
         </div>
 
