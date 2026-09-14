@@ -1,14 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
+
+// Classic CLI braille spinner (npm/yarn-style) — on-brand for a terminal-ish
+// UI, and generic enough to represent "waiting on some upstream," whichever
+// source (Sourcegraph, GitHub, a future one) actually answers the request.
+const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
+function useSpinner(active) {
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    if (!active) return;
+    const id = setInterval(() => setFrame((f) => (f + 1) % SPINNER_FRAMES.length), 80);
+    return () => clearInterval(id);
+  }, [active]);
+
+  return SPINNER_FRAMES[frame];
+}
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | done | error
   const [variables, setVariables] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const spinner = useSpinner(status === "loading");
 
   async function runSearch(q) {
     if (!q) return;
@@ -61,14 +79,15 @@ export default function Home() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="what are you trying to name?"
             autoFocus
-            className="flex-1 bg-transparent text-foreground placeholder:text-muted outline-none"
+            disabled={status === "loading"}
+            className="flex-1 bg-transparent text-foreground placeholder:text-muted outline-none disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={status === "loading"}
             className="shrink-0 text-sm text-muted transition-colors hover:text-accent disabled:opacity-50"
           >
-            {status === "loading" ? "searching…" : "[ search ]"}
+            {status === "loading" ? `${spinner} searching` : "[ search ]"}
           </button>
         </form>
 
@@ -88,10 +107,25 @@ export default function Home() {
             </div>
           )}
 
-          {status === "error" && <p className="text-sm text-accent">{"// "}{errorMessage}</p>}
+          {status === "loading" && (
+            <p className="text-sm text-muted">
+              <span className="text-accent">{spinner}</span> searching for &ldquo;{query}&rdquo;…
+            </p>
+          )}
+
+          {status === "error" && (
+            <p className="text-sm text-accent">
+              {"! "}
+              {errorMessage}
+            </p>
+          )}
 
           {status === "done" && variables.length === 0 && (
-            <p className="text-sm text-muted">{"// no variable names found for that one"}</p>
+            <p className="text-sm text-muted">
+              {"// nothing found for \""}
+              {query}
+              {"\" — try different words"}
+            </p>
           )}
 
           {status === "done" && variables.length > 0 && (
