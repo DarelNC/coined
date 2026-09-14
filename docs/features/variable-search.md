@@ -19,9 +19,12 @@ This is the entire value proposition of Codelf. Everything else is secondary.
 
 ## Explicitly out of scope for v1
 
-- Language filter (legacy had `&lan=` filtering) — worth adding later once the core loop works, not blocking v1.
 - Query translation for non-English input — see [README.md](README.md) cut list.
 - Pagination beyond a first page of results — revisit once real usage shows it's needed.
+
+## Language filter: built (2026-09-14)
+
+No longer out of scope — done. `?lang=` param on `/api/search`, passed through to Sourcegraph's own `lang:` query syntax. UI is a row of bracket-style toggles (`[any] [js] [ts] [py] [go] [rust] [java]`, matching the existing `[ search ]` button) rather than a `<select>` — a short, deliberately non-exhaustive list, not a full language picker. Selecting a language re-runs an active search immediately. Cache key includes `lang` so filtered and unfiltered results for the same query don't collide.
 
 ## Implementation notes (learned while building)
 
