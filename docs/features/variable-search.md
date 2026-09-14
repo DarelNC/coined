@@ -29,6 +29,12 @@ This is the entire value proposition of Codelf. Everything else is secondary.
 - **Had to exclude prose files from the query** (`lib/sourcegraph.js`, `NON_CODE_FILES` constant: `-file:\.(md|mdx|txt|rst)$`). Without it, results were dominated by README/docs files that happen to mention the search term in prose, not actual variable declarations — defeats the point of "real-world code." Worth remembering if result quality regresses later: check this filter first.
 - Files: `lib/extractVariables.js` (pure, ported from legacy, unit tested in `lib/__tests__/`), `lib/sourcegraph.js` (upstream client), `lib/searchCache.js` (in-memory query cache), `app/api/search/route.js` (the proxy route — the only thing the frontend calls), `app/page.js` (search UI).
 
-## Open questions (not yet resolved)
+## Result count: resolved (2026-09-14)
 
-- Exact result volume/`count:` tuning for a useful spread of variable names per search — currently `count:30`, not yet tuned against real usage.
+Tested `count:15/30/50/80/100/150/200` against 4 representative queries, measuring unique-variable yield and latency. Findings:
+
+- **Latency stayed flat (~1.2-1.8s) across the whole range** — Sourcegraph's own query/ranking time dominates, not our payload size or parsing. So a higher count is effectively free in response-time terms.
+- **Variable diversity kept climbing with count, no clear plateau** even at 200 (e.g. "user session": 34 unique variables at count:15 → 69 at count:200).
+- The old default of `count:30` was a guess that undershot badly for some queries (2 unique variables for "debounce timer" vs. 10 at count:200).
+
+**Decision: `count:100`**, not higher, despite latency allowing it. The objection that mattered: this is a free, anonymous, unauthenticated upstream we don't control — the same shape of dependency that killed legacy Codelf. Maximizing load on it by default just because it's currently cheap for us is a bad habit given the project's own founding lesson (see architecture.md). `count:100` gives a clear, measured improvement over the old arbitrary default (roughly 2-4x more unique variables in testing) without being the most aggressive option available.
