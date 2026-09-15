@@ -17,7 +17,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: "Codelf",
+  title: "Coined",
   description: "Search real-world code to find out how other developers name things.",
 };
 

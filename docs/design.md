@@ -27,7 +27,7 @@ None of these are wrong in isolation. The problem is that all of them together, 
 
 ## Do instead: lean into what this product actually is
 
-Codelf is a tool built by a developer, for developers, to search real code. The design should say that, not pretend to be a generic SaaS product:
+Coined is a tool built by a developer, for developers, to search real code. The design should say that, not pretend to be a generic SaaS product:
 
 - **Typography with real hierarchy.** Pair a distinct display/serif or characterful sans for headings with a monospace face for anything code-related (search input, results, keywords) — the monospace isn't decoration here, it's literally showing code.
 - **A deliberate, non-default color system** tied to the product, not the default purple/blue AI-gradient palette. Pick real values, name them, use them consistently.

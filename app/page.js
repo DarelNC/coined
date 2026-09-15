@@ -104,7 +104,7 @@ export default function Home() {
     <div className="flex flex-1 flex-col bg-background">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-16 sm:px-10">
         <header className="flex items-baseline justify-between gap-4 border-b border-border pb-6">
-          <h1 className="font-serif text-4xl italic tracking-tight text-foreground">Codelf</h1>
+          <h1 className="font-serif text-4xl italic tracking-tight text-foreground">Coined</h1>
           <p className="hidden shrink-0 text-xs text-muted sm:block">
             {"// real names, from real code"}
           </p>

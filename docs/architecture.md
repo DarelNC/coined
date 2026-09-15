@@ -1,5 +1,9 @@
 # Architecture
 
+## Project name: Coined, not Codelf (2026-09-15)
+
+This project is called **Coined**, not Codelf. The original `unbug/codelf` is still live — repo, VS Code extension, Vim plugin all still exist, just functionally broken (see below). Shipping an unrelated codebase under the identical name risked looking like squatting on someone else's brand rather than original work. "Codelf" below and throughout these docs refers to the legacy project being analyzed, not this one.
+
 ## Legacy analysis (why the original Codelf is broken)
 
 Cloned and inspected [unbug/codelf](https://github.com/unbug/codelf) (2026-09-14) to find the real root cause before designing a replacement.

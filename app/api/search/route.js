@@ -25,7 +25,7 @@ async function searchAllSources(q, { lang }) {
 }
 
 // Frontend only ever calls this route, never an upstream directly — see
-// codelf/docs/rules.md (never call a third-party API from the client).
+// coined/docs/rules.md (never call a third-party API from the client).
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const q = (searchParams.get('q') || '').trim();

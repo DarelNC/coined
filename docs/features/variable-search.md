@@ -6,7 +6,7 @@ Status: v1 built and working (frontend → `/api/search` → Sourcegraph → ext
 
 User types a word or phrase (what they're trying to name — e.g. "debounce timer"). The app returns real-world variable/function names other developers used in that context, pulled from actual public code, grouped by source repo/language, with a link back to the source.
 
-This is the entire value proposition of Codelf. Everything else is secondary.
+This is the entire value proposition of Coined. Everything else is secondary.
 
 ## Flow
 
