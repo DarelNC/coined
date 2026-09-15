@@ -1,8 +1,18 @@
 {
   "name": "coined",
   "version": "0.1.0",
+  "description": "Search real-world code to find out how other developers name things.",
   "private": true,
   "license": "MIT",
+  "author": "DarelNC <darelchcrespo@hotmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DarelNC/coined.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DarelNC/coined/issues"
+  },
+  "homepage": "https://github.com/DarelNC/coined",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
