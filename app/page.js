@@ -239,8 +239,9 @@ export default function Home() {
           )}
         </div>
 
-        <footer className="mt-16 text-xs font-medium text-foreground/50">
-          search real, public code — not a suggestion engine 🔍
+        <footer className="mt-16 flex flex-col gap-1 text-xs font-medium text-foreground/50">
+          <span>pulled straight from real, public code 🔍</span>
+          <span className="text-foreground/30">running on coffee and bad decisions ☕</span>
         </footer>
       </div>
     </div>
