@@ -1,20 +1,19 @@
-# Feature: Theme picker
+# Feature: Color palette picker
 
-Status: built, 2026-09-16.
+Status: built, 2026-09-16 (corrected from a first attempt — see below).
 
 ## What it does
 
-Three visually distinct themes — Maximalist (default), Editorial, Brutalist — all sharing the same real search behavior. A small dot picker fixed top-right switches between them instantly. The choice persists in `localStorage` only: no cookie, no server sync, no cache. A fresh browser (or private window) always starts on Maximalist.
+Four color palettes for the Maximalist theme — Grape (default), Sunset, Forest, Midnight — each a full background/foreground/accent/4-pop-color set. A small swatch picker top-right switches between them instantly, no reload. Persisted in `localStorage` only: no cookie, no server sync, no cache. A fresh browser always starts on Grape.
 
-## Why this shape
+## Correction: this isn't what got built first
 
-The three themes started as separate uncommitted experiment routes (`app/style-*`) built to explore genuinely different UI/UX directions per `docs/design.md`. Once the user wanted to actually pick between them at runtime rather than in code, duplicating the search/copy/pagination logic three times became a real maintenance risk — a bug fixed in one theme's copy-to-clipboard handler wouldn't reach the other two.
+The first pass misread "theme picker" as switching between the three *different UI/UX styles* explored earlier (Maximalist/Editorial/Brutalist) — built and shipped that, then the user corrected it: they meant color palettes *within* Maximalist specifically, not a switcher between entirely different designs. Reverted `app/page.js` back to rendering only `MaximalistTheme`; the Editorial/Brutalist components stay in `app/themes/` (unreferenced, not deleted — real work, might come back as a separate "layout" dimension later) but nothing in the UI currently links to them.
 
-Fix: extracted all of it into `lib/useSearch.js`, a single hook with no rendering opinion at all (search, language filter, copy-to-clipboard, pagination — the same logic `docs/rules.md`'s architecture principle already called for keeping separate from where the data comes from, applied here to where the UI renders it instead). Each theme component (`app/themes/*.js`) is purely presentational, calling the same hook. `app/page.js` is now just the picker plus whichever theme component is active.
+## Implementation
 
-## Implementation notes
-
-- **Hydration:** the picker's persisted choice is read in a `useEffect` after mount, not during initial render — server and the first client render always agree on the default (Maximalist), so there's no hydration mismatch, at the cost of a possible one-frame flash to a saved non-default theme on reload. Accepted tradeoff for "local only, no cache" simplicity; would need a cookie read on the server to avoid entirely, which wasn't asked for.
-- Hit a real ESLint rule (`react-hooks/set-state-in-effect`) on the "read localStorage, then setState" pattern — a legitimate one-time external-store sync, not the derived-state-from-props anti-pattern the rule exists to catch. Scoped `eslint-disable-next-line` with a comment, rather than restructuring into something worse just to satisfy the linter.
-- Switching themes remounts the active theme component, so in-progress search state resets — acceptable, not treated as a bug (no user has mid-search state worth preserving across a full visual reskin).
-- All three themes kept full feature parity (search, language filter x7, copy-to-clipboard, real pagination) — the two experiment themes didn't have copy-to-clipboard or real pagination in their mockup form; both were added here so switching themes never loses functionality.
+- `lib/palettes.js`: each palette is a flat object of CSS custom property overrides (`--background`, `--foreground`, `--muted`, `--accent`, `--pop-1..4`) plus a label and a swatch color for the picker itself.
+- Applied via inline `style` on `MaximalistTheme`'s root element — since every existing Tailwind class already resolves through these CSS variables (`bg-background`, `bg-accent`, `bg-pop-1`, ...), switching the palette repaints the whole page with zero markup/class changes.
+- Renamed the CSS variable slots from color-specific names (`--pop-pink`, `--pop-cyan`, ...) to generic ones (`--pop-1..4`) in `app/globals.css` — the old names stopped making sense once the hue at each slot became palette-dependent.
+- Same hydration-safe pattern as before: default palette matches server render, `localStorage` is read after mount in a `useEffect` (scoped `eslint-disable` on the `react-hooks/set-state-in-effect` line — a legitimate one-time external-store read, not the anti-pattern that rule exists to catch).
+- Unlike the (reverted) full theme switcher, picking a palette does **not** remount the search state — it's the same component, just restyled, so an in-progress search survives a palette change. That's a genuine improvement over the first attempt's behavior, not just a smaller feature.

@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSearch, PAGE_SIZE } from "@/lib/useSearch";
+import { PALETTES, DEFAULT_PALETTE } from "@/lib/palettes";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
 const LANGUAGES = [
@@ -12,7 +14,8 @@ const LANGUAGES = [
   { label: "rust", value: "rust" },
   { label: "java", value: "java" },
 ];
-const POP_COLORS = ["var(--accent)", "var(--pop-pink)", "var(--pop-cyan)", "var(--pop-lime)", "var(--pop-orange)"];
+const POP_COLORS = ["var(--accent)", "var(--pop-1)", "var(--pop-2)", "var(--pop-3)", "var(--pop-4)"];
+const PALETTE_STORAGE_KEY = "coined-palette";
 
 function popRotation(i) {
   return ((i % 5) - 2) * 1.5;
@@ -20,15 +23,55 @@ function popRotation(i) {
 
 export default function MaximalistTheme() {
   const s = useSearch();
+  const [paletteKey, setPaletteKey] = useState(DEFAULT_PALETTE);
+
+  // Client-only preference, no cache/server sync — read once after mount so
+  // server and first client render always match (no hydration mismatch).
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PALETTE_STORAGE_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved && PALETTES[saved]) setPaletteKey(saved);
+    } catch {
+      // localStorage unavailable (private mode, etc.) — just stay on default
+    }
+  }, []);
+
+  function choosePalette(key) {
+    setPaletteKey(key);
+    try {
+      localStorage.setItem(PALETTE_STORAGE_KEY, key);
+    } catch {
+      // best-effort only — palette still applies for this session
+    }
+  }
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex flex-1 flex-col bg-background" style={PALETTES[paletteKey].vars}>
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-14 sm:px-10">
-        <header className="flex flex-wrap items-center gap-4">
-          <span className="animate-wiggle-hover -rotate-3 rounded-full bg-accent px-5 py-2 text-3xl font-bold text-background">
-            Coined
-          </span>
-          <span className="rotate-2 text-sm text-muted">what do you call this thing? 🤔</span>
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="animate-wiggle-hover -rotate-3 rounded-full bg-accent px-5 py-2 text-3xl font-bold text-background">
+              Coined
+            </span>
+            <span className="rotate-2 text-sm text-muted">what do you call this thing? 🤔</span>
+          </div>
+
+          <div className="flex gap-1.5 rounded-full bg-foreground/10 p-1.5">
+            {Object.entries(PALETTES).map(([key, p]) => (
+              <button
+                key={key}
+                onClick={() => choosePalette(key)}
+                title={p.label}
+                aria-label={`Switch to ${p.label} palette`}
+                aria-pressed={paletteKey === key}
+                className={`h-5 w-5 rounded-full border-2 transition-transform hover:scale-110 ${
+                  paletteKey === key ? "scale-110 border-foreground" : "border-transparent opacity-70"
+                }`}
+                style={{ backgroundColor: p.swatch }}
+              />
+            ))}
+          </div>
         </header>
 
         <form onSubmit={s.handleSubmit} className="mt-10 flex gap-3">
@@ -44,7 +87,7 @@ export default function MaximalistTheme() {
           <button
             type="submit"
             disabled={s.status === "loading"}
-            className="flex shrink-0 items-center gap-2 rounded-full bg-pop-pink px-6 py-3 font-bold text-background transition-transform hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
+            className="flex shrink-0 items-center gap-2 rounded-full bg-pop-1 px-6 py-3 font-bold text-background transition-transform hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
           >
             {s.status === "loading" ? (
               <>
@@ -104,7 +147,7 @@ export default function MaximalistTheme() {
           )}
 
           {s.status === "error" && (
-            <p className="w-fit rounded-2xl bg-pop-pink px-4 py-2 text-lg font-bold text-background">
+            <p className="w-fit rounded-2xl bg-pop-1 px-4 py-2 text-lg font-bold text-background">
               {s.errorMessage}
             </p>
           )}

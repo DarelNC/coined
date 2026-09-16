@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
+/* Default palette (Grape) — a MaximalistTheme instance overrides these
+   inline on its root element when a different palette is picked. Named
+   generically (pop-1..4, not "pop-pink") since the hue at each slot
+   changes per palette. See lib/palettes.js. */
 :root {
   --background: #2b1a33;
   --foreground: #fdf6e3;
   --muted: #b3a3ba;
   --border: #fdf6e3;
   --accent: #ffd23f;
-  --pop-pink: #ff6ec7;
-  --pop-cyan: #4ecdc4;
-  --pop-lime: #c6f24e;
-  --pop-orange: #ff8c42;
+  --pop-1: #ff6ec7;
+  --pop-2: #4ecdc4;
+  --pop-3: #c6f24e;
+  --pop-4: #ff8c42;
 }
 
 @theme inline {
@@ -18,10 +22,10 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
-  --color-pop-pink: var(--pop-pink);
-  --color-pop-cyan: var(--pop-cyan);
-  --color-pop-lime: var(--pop-lime);
-  --color-pop-orange: var(--pop-orange);
+  --color-pop-1: var(--pop-1);
+  --color-pop-2: var(--pop-2);
+  --color-pop-3: var(--pop-3);
+  --color-pop-4: var(--pop-4);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
 }
