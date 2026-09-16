@@ -36,9 +36,18 @@ Coined is a tool built by a developer, for developers, to search real code. The 
 - **Motion with intent** — real hover/focus states and transitions that read as craft, not a static card grid.
 - **Custom or heavily adapted iconography/visual details** if icons are used at all, rather than default library icons in default circles.
 
+## The same constraint applies to copy, not just visuals
+
+AI-generated writing has its own tells. Watch for these anywhere the product talks to the user (headings, buttons, empty states, footers):
+
+- **The contrastive tag**: "X — not Y." (caught this in our own footer: "search real, public code — not a suggestion engine" → fixed to "pulled straight from real, public code 🔍").
+- Throat-clearing openers ("In today's fast-paced world..."), marketing verbs on a tool nobody's marketing ("unlock", "supercharge"), hollow superlatives ("seamless", "game-changing"), corporate padding ("leverage", "robust solution"), hedge-everything openers ("Whether you're a beginner or an expert..."), rhetorical-question filler ("Ever wondered how...?").
+
+Fix: say the specific true thing, in the voice of a person. A real catchphrase beats safe, balanced copy — see the footer's "running on coffee and bad decisions ☕" for what that looks like in practice.
+
 ## Self-check before shipping UI work
 
-Ask: *"Would this specific choice look identical on a random AI-generated SaaS landing page?"* If yes, it's not done yet.
+Ask: *"Would this specific choice look identical on a random AI-generated SaaS landing page?"* If yes, it's not done yet. Applies to copy too — would this line read identically on any other product's site?
 
 ## Previous implementation (v1 redesign, 2026-09-14 — superseded)
 
