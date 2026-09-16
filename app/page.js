@@ -3,10 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
-// Sourcegraph lang: values. Kept short on purpose — a handful of common
-// languages, not an exhaustive picker.
 const LANGUAGES = [
   { label: "any", value: "" },
   { label: "js", value: "javascript" },
@@ -17,21 +15,16 @@ const LANGUAGES = [
   { label: "java", value: "java" },
 ];
 
-// Classic CLI braille spinner (npm/yarn-style) — on-brand for a terminal-ish
-// UI, and generic enough to represent "waiting on some upstream," whichever
-// source (Sourcegraph, GitHub, a future one) actually answers the request.
-const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+const POP_COLORS = [
+  "var(--accent)",
+  "var(--pop-pink)",
+  "var(--pop-cyan)",
+  "var(--pop-lime)",
+  "var(--pop-orange)",
+];
 
-function useSpinner(active) {
-  const [frame, setFrame] = useState(0);
-
-  useEffect(() => {
-    if (!active) return;
-    const id = setInterval(() => setFrame((f) => (f + 1) % SPINNER_FRAMES.length), 80);
-    return () => clearInterval(id);
-  }, [active]);
-
-  return SPINNER_FRAMES[frame];
+function popRotation(i) {
+  return ((i % 5) - 2) * 1.5;
 }
 
 export default function Home() {
@@ -43,7 +36,6 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState("");
   const [copiedKeyword, setCopiedKeyword] = useState("");
   const copyTimeoutRef = useRef(null);
-  const spinner = useSpinner(status === "loading");
 
   useEffect(() => () => clearTimeout(copyTimeoutRef.current), []);
 
@@ -70,7 +62,7 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMessage(data.error || "search failed, try again.");
+        setErrorMessage(data.error || "Oops, that broke.");
         setStatus("error");
         return;
       }
@@ -79,7 +71,7 @@ export default function Home() {
       setVisibleCount(PAGE_SIZE);
       setStatus("done");
     } catch {
-      setErrorMessage("search failed, try again.");
+      setErrorMessage("Oops, that broke.");
       setStatus("error");
     }
   }
@@ -94,150 +86,178 @@ export default function Home() {
     runSearch(example, lang);
   }
 
+  function surpriseMe() {
+    const pick = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+    runExample(pick);
+  }
+
   function selectLang(value) {
     setLang(value);
-    // if there's an active query, re-run it immediately under the new filter
     if (query.trim()) runSearch(query.trim(), value);
   }
 
   return (
     <div className="flex flex-1 flex-col bg-background">
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-16 sm:px-10">
-        <header className="flex items-baseline justify-between gap-4 border-b border-border pb-6">
-          <h1 className="font-serif text-4xl italic tracking-tight text-foreground">Coined</h1>
-          <p className="hidden shrink-0 text-xs text-muted sm:block">
-            {"// real names, from real code"}
-          </p>
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-14 sm:px-10">
+        <header className="flex flex-wrap items-center gap-4">
+          <span className="animate-wiggle-hover -rotate-3 rounded-full bg-accent px-5 py-2 text-3xl font-bold text-background">
+            Coined
+          </span>
+          <span className="rotate-2 text-sm text-muted">what do you call this thing? 🤔</span>
         </header>
 
-        <form onSubmit={handleSubmit} className="mt-10 flex items-center gap-3 border-b border-border pb-3">
-          <span className="select-none text-accent">&gt;</span>
+        <form onSubmit={handleSubmit} className="mt-10 flex gap-3">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="what are you trying to name?"
+            placeholder="type your idea..."
             autoFocus
             disabled={status === "loading"}
-            className="flex-1 bg-transparent text-foreground placeholder:text-muted outline-none disabled:opacity-50"
+            className="flex-1 rounded-full border-2 border-foreground/20 bg-foreground/10 px-6 py-3 font-medium text-foreground outline-none placeholder:text-foreground/40 focus:border-accent disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={status === "loading"}
-            className="shrink-0 text-sm text-muted transition-colors hover:text-accent disabled:opacity-50"
+            className="flex shrink-0 items-center gap-2 rounded-full bg-pop-pink px-6 py-3 font-bold text-background transition-transform hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
           >
-            {status === "loading" ? `${spinner} searching` : "[ search ]"}
+            {status === "loading" ? (
+              <>
+                <Dots />
+                <span>looking</span>
+              </>
+            ) : (
+              "find it ✨"
+            )}
           </button>
         </form>
 
-        <div className="mt-3 flex gap-4">
+        <div className="mt-4 flex flex-wrap gap-2">
           {LANGUAGES.map((l) => (
             <button
               key={l.value}
               onClick={() => selectLang(l.value)}
               disabled={status === "loading"}
-              className={`text-xs transition-colors disabled:opacity-50 ${
-                lang === l.value ? "text-accent" : "text-muted hover:text-accent"
+              className={`rounded-full px-4 py-1 text-sm font-bold transition-colors disabled:opacity-50 ${
+                lang === l.value
+                  ? "bg-accent text-background"
+                  : "bg-foreground/10 text-foreground/70 hover:bg-foreground/20"
               }`}
             >
-              [{l.label}]
+              {l.label}
             </button>
           ))}
         </div>
 
-        <div className="mt-8 flex-1">
+        <div className="mt-12 flex-1">
           {status === "idle" && (
-            <div className="flex flex-col gap-2">
-              {EXAMPLES.map((example) => (
+            <div className="flex flex-wrap items-center gap-3">
+              {EXAMPLES.map((ex, i) => (
                 <button
-                  key={example}
-                  onClick={() => runExample(example)}
-                  className="w-fit text-left text-sm text-muted transition-colors hover:text-accent"
+                  key={ex}
+                  onClick={() => runExample(ex)}
+                  style={{ borderColor: POP_COLORS[i % POP_COLORS.length] }}
+                  className="rounded-2xl border-2 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/10"
                 >
-                  {"// try: "}
-                  {example}
+                  {ex}
                 </button>
               ))}
+              <button
+                onClick={surpriseMe}
+                className="rounded-2xl bg-foreground/10 px-4 py-2 text-sm font-bold text-foreground transition-transform hover:scale-105 hover:bg-foreground/20"
+              >
+                🎲 surprise me
+              </button>
             </div>
           )}
 
           {status === "loading" && (
-            <p className="text-sm text-muted">
-              <span className="text-accent">{spinner}</span> searching for &ldquo;{query}&rdquo;…
-            </p>
+            <div className="flex items-center gap-3 text-lg font-medium text-foreground/70">
+              <Dots size="lg" />
+              <span>looking around for &ldquo;{query}&rdquo;…</span>
+            </div>
           )}
 
           {status === "error" && (
-            <p className="text-sm text-accent">
-              {"! "}
+            <p className="w-fit rounded-2xl bg-pop-pink px-4 py-2 text-lg font-bold text-background">
               {errorMessage}
             </p>
           )}
 
           {status === "done" && variables.length === 0 && (
-            <p className="text-sm text-muted">
-              {"// nothing found for \""}
-              {query}
-              {"\" — try different words"}
+            <p className="text-lg font-medium text-foreground/70">
+              nothing for &ldquo;{query}&rdquo; — try again? 🤷
             </p>
           )}
 
           {status === "done" && variables.length > 0 && (
             <>
-              <ul className="flex flex-col">
-                {variables.slice(0, visibleCount).map((v) => (
-                  <li
-                    key={v.keyword}
-                    className="group/row flex items-baseline justify-between gap-4 border-l-2 border-border pl-4 py-3 transition-colors hover:border-accent"
-                  >
-                    <button
-                      onClick={() => copyKeyword(v.keyword)}
-                      title="click to copy"
-                      aria-label={
-                        copiedKeyword === v.keyword ? `${v.keyword}, copied` : `copy ${v.keyword}`
-                      }
-                      className="group/chip truncate text-lg text-foreground transition-colors hover:text-accent"
+              <div className="flex flex-wrap gap-4">
+                {variables.slice(0, visibleCount).map((v, i) => {
+                  const color = POP_COLORS[i % POP_COLORS.length];
+                  const rot = popRotation(i);
+                  return (
+                    <div
+                      key={v.keyword}
+                      style={{ backgroundColor: color, "--rot": `${rot}deg`, animationDelay: `${i * 40}ms` }}
+                      className="animate-pop-in flex flex-col rounded-2xl px-4 py-3 text-background shadow-lg transition-transform hover:scale-105 hover:rotate-0"
                     >
-                      <span className="text-accent opacity-0 transition-opacity group-hover/chip:opacity-100">
-                        {"[ "}
-                      </span>
-                      {copiedKeyword === v.keyword ? "copied" : v.keyword}
-                      <span className="text-accent opacity-0 transition-opacity group-hover/chip:opacity-100">
-                        {" ]"}
-                      </span>
-                    </button>
-                    <a
-                      href={v.repoLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 text-xs text-muted transition-colors hover:text-accent"
-                    >
-                      {v.repoLang} · {v.repoList.length} repo{v.repoList.length === 1 ? "" : "s"}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+                      <button
+                        onClick={() => copyKeyword(v.keyword)}
+                        aria-label={copiedKeyword === v.keyword ? `${v.keyword}, copied` : `copy ${v.keyword}`}
+                        title="click to copy"
+                        className="text-left font-mono text-base font-bold"
+                      >
+                        {copiedKeyword === v.keyword ? "copied! ✅" : v.keyword}
+                      </button>
+                      <a
+                        href={v.repoLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-medium opacity-70 hover:underline"
+                      >
+                        {v.repoLang} · {v.repoList.length} repo{v.repoList.length === 1 ? "" : "s"}
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
 
               {visibleCount < variables.length ? (
                 <button
                   onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  className="mt-4 text-sm text-muted transition-colors hover:text-accent"
+                  className="mt-6 rounded-full bg-foreground/10 px-5 py-2 text-sm font-bold text-foreground transition-transform hover:scale-105 hover:bg-foreground/20"
                 >
-                  {`[ load more — ${variables.length - visibleCount} more ]`}
+                  {`show more ✨ (${variables.length - visibleCount})`}
                 </button>
               ) : (
                 variables.length > PAGE_SIZE && (
-                  <p className="mt-4 text-sm text-muted">{"// that's everything found"}</p>
+                  <p className="mt-6 text-sm font-medium text-foreground/60">that&apos;s all of them! 🎉</p>
                 )
               )}
             </>
           )}
         </div>
 
-        <footer className="mt-16 text-xs text-muted">
-          {"// search real, public code — not a suggestion engine"}
+        <footer className="mt-16 text-xs font-medium text-foreground/50">
+          search real, public code — not a suggestion engine 🔍
         </footer>
       </div>
     </div>
+  );
+}
+
+function Dots({ size = "sm" }) {
+  const dot = size === "lg" ? "h-2.5 w-2.5" : "h-1.5 w-1.5";
+  return (
+    <span className="flex items-center gap-1">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          style={{ animationDelay: `${i * 0.12}s` }}
+          className={`animate-bounce-dot rounded-full bg-current ${dot}`}
+        />
+      ))}
+    </span>
   );
 }

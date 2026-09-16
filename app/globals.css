@@ -1,11 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0c0b09;
-  --foreground: #efe9dd;
-  --muted: #8f887a;
-  --border: #241f18;
-  --accent: #e2a63c;
+  --background: #2b1a33;
+  --foreground: #fdf6e3;
+  --muted: #b3a3ba;
+  --border: #fdf6e3;
+  --accent: #ffd23f;
+  --pop-pink: #ff6ec7;
+  --pop-cyan: #4ecdc4;
+  --pop-lime: #c6f24e;
+  --pop-orange: #ff8c42;
 }
 
 @theme inline {
@@ -14,17 +18,49 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
-  --font-serif: var(--font-serif);
+  --color-pop-pink: var(--pop-pink);
+  --color-pop-cyan: var(--pop-cyan);
+  --color-pop-lime: var(--pop-lime);
+  --color-pop-orange: var(--pop-orange);
+  --font-display: var(--font-display);
   --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
 }
 
 ::selection {
   background: var(--accent);
   color: var(--background);
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.7) rotate(var(--rot, 0deg)); }
+  70% { transform: scale(1.05) rotate(var(--rot, 0deg)); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
+}
+
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+.animate-wiggle-hover:hover {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.animate-bounce-dot {
+  animation: bounce-dot 1s ease-in-out infinite;
 }

@@ -40,13 +40,17 @@ Coined is a tool built by a developer, for developers, to search real code. The 
 
 Ask: *"Would this specific choice look identical on a random AI-generated SaaS landing page?"* If yes, it's not done yet.
 
-## Current implementation (v1 redesign, 2026-09-14)
+## Previous implementation (v1 redesign, 2026-09-14 — superseded)
 
-Concrete system actually shipped, so future changes have a baseline to react to instead of the abstract principles above:
+Terminal-inspired: warm near-black background, single amber accent, Source Serif 4 wordmark + IBM Plex Mono everything else, left-aligned diff-gutter result rows. Replaced below after exploring three genuinely different directions (editorial/print, neubrutalist, playful/maximalist — see git history for the editorial and brutalist experiments, both were built as real working routes and screenshotted before this one was picked) and choosing maximalist as the shipped default.
 
-- **Palette:** warm near-black background (`#0c0b09`), warm off-white text (`#efe9dd`), single accent amber (`#e2a63c`) used only for the prompt caret, hover states, and the active result's left border — not decoratively. No purple/blue anywhere.
-- **Type:** two faces only. Source Serif 4 (italic) for the wordmark, used exactly once. IBM Plex Mono for literally everything else — input, buttons, results, body copy — since the product's whole subject is code identifiers.
-- **Layout:** left-aligned throughout, no centered hero. The page reads like a terminal session: a prompt-style search line (`>` caret, no rounded pill input), results as a plain list with a left-border accent (diff/blame-gutter style) rather than cards in a grid.
-- **Empty state:** real example queries the user can click (`// try: debounce timer`), not a decorative illustration.
-- **No dark/light toggle** — this dark palette is the fixed brand identity, not a default left on. Revisit only as a deliberate decision, not because it's an obvious gap.
-- Fonts loaded via `next/font/google` in `app/layout.js`; tokens defined in `app/globals.css` (`--background`, `--foreground`, `--muted`, `--border`, `--accent`).
+## Current implementation (maximalist, 2026-09-16)
+
+- **Palette:** deep plum background (`#2b1a33`), warm cream text (`#fdf6e3`), a 5-color "pop" palette (yellow `--accent`, pink `--pop-pink`, cyan `--pop-cyan`, lime `--pop-lime`, orange `--pop-orange`) cycled per result/example — deliberately more colorful than the single-accent-only rule that governed the previous version, because color variety *is* the point of this direction. No purple/blue-gradient AI look regardless — these are flat, named, deliberate values, not a default gradient.
+- **Type:** Fredoka (rounded, playful) for the wordmark and all UI chrome; JetBrains Mono only for the actual result keywords, since those are literally code identifiers.
+- **Layout:** rounded pill/badge language throughout, used as a deliberate theme (not a default `rounded-lg` left untouched) — sticker-like result badges with slight per-item rotation, pill buttons and inputs.
+- **Motion, added with intent, not decoration:** wordmark wiggles on hover only (not looping — a looping idle animation reads as noisy, not crafted); results pop in with a staggered scale/rotate entrance on arrival; a 3-dot bounce loader communicates the async wait during search. All defined as named keyframes in `app/globals.css` (`wiggle`, `pop-in`, `bounce-dot`), not ad-hoc inline animation.
+- **New interaction:** a "🎲 surprise me" button in the idle state runs a random example query — a small bit of personality, not just a static example list.
+- **Feature parity maintained:** copy-to-clipboard (click a result keyword), pagination ("show more"), and the full language filter list all carried over from the terminal version — a visual redesign never means losing functionality.
+- **No dark/light toggle** — same reasoning as before: this palette is the fixed brand identity, not a default left on.
+- Fonts loaded via `next/font/google` in `app/layout.js` (`--font-display`, `--font-mono`); tokens in `app/globals.css` (`--background`, `--foreground`, `--muted`, `--border`, `--accent`, `--pop-*`).
