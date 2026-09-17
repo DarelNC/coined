@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Coined
 
-## Getting Started
+**How do other developers name this?** Type what you're trying to name — search real, public code, get back the actual variable/function names people used, grouped by repo and language.
 
-First, run the development server:
+<!--
+TODO: add a real screenshot here, e.g.
+![Coined search results](docs/screenshot.png)
+Run the app (npm run dev), search something like "retry counter",
+screenshot the results, save it as docs/screenshot.png, commit it.
+-->
+
+## Why
+
+The obvious tool for this already existed — [Codelf](https://github.com/unbug/codelf) — but its one search backend (`searchcode.com`'s free API) was shut down, and the app's been silently broken ever since. Coined isn't a fork; it's a from-scratch rebuild of the same idea, on top of sources that are actually still alive, with a failover between two of them so it can't die the same way again. Full story in [`docs/architecture.md`](docs/architecture.md).
+
+## Try it
 
 ```bash
+git clone https://github.com/DarelNC/coined.git
+cd coined
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Search works immediately — no setup, no API key. It queries [Sourcegraph](https://sourcegraph.com)'s public code search anonymously.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Optional: GitHub fallback
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If Sourcegraph is ever down or rate-limited, Coined can fall back to GitHub's code search — but GitHub requires authentication for that, even for public code. To enable it:
 
-## Learn More
+1. Create a [Personal Access Token](https://github.com/settings/tokens) (classic, **zero scopes** — public code search needs none)
+2. Copy `.env.example` to `.env.local` and set `GITHUB_TOKEN=<your token>`
 
-To learn more about Next.js, take a look at the following resources:
+Without a token, this fallback is just skipped — the app works exactly the same either way, one source deep instead of two.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## What it does
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Real-world variable/function names, not suggestions — pulled from actual public code
+- Falls back between two independent search sources instead of depending on one
+- Filter by language, copy any result to your clipboard with one click, load more as you go
+- Four color palettes, switchable live, remembered locally (no account, no tracking)
 
-## Deploy on Vercel
+## Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Next.js (App Router) + plain JavaScript + Tailwind CSS. No database, no accounts — the whole point is staying small enough that nothing here can quietly rot the way the original did. Full breakdown in [`docs/stack.md`](docs/stack.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## The decision log
+
+Every non-trivial choice in this repo — why this stack, why this architecture, why this design direction, what got cut and why — is written down under [`docs/`](docs/), not just implied by the diff. Start with [`docs/architecture.md`](docs/architecture.md) if you're curious how this actually came together.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
