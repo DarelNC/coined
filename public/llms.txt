@@ -1,0 +1,26 @@
+# Coined
+
+> Search real, public code to find out how other developers name things. Type what you're trying to name (e.g. "retry counter"), get back actual variable/function names other developers used, pulled from real repositories, grouped by language.
+
+Coined is a free, open-source web app. It has one real feature: variable/function-naming search. It is not a code generator, not a suggestion engine, and does not use AI to invent names — every result is a name a real developer actually used in real, public code.
+
+## How it works
+
+- Search source: [Sourcegraph](https://sourcegraph.com)'s public code search API (primary), with a fallback to GitHub's code search API when configured. No account or login required to use the site.
+- Results are grouped by language and by the repository they came from, with a link back to the source.
+- Filters: by programming language (JavaScript, TypeScript, Python, Go, Rust, Java, or any).
+
+## Background
+
+Coined is a from-scratch rebuild of the idea behind [Codelf](https://github.com/unbug/codelf), an older tool with the same goal whose search backend was discontinued. Coined is not a fork and shares no code with Codelf; it is a new implementation on top of different, currently-maintained data sources.
+
+## Links
+
+- Live app: https://coined.vercel.app
+- Source code: https://github.com/DarelNC/coined
+- Full architecture and design decisions: https://github.com/DarelNC/coined/tree/master/docs
+- License: MIT
+
+## Stack
+
+Next.js (App Router), plain JavaScript, Tailwind CSS. No database, no user accounts, no tracking.
