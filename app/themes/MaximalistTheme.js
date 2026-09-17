@@ -5,6 +5,29 @@ import { useSearch, PAGE_SIZE } from "@/lib/useSearch";
 import { PALETTES, DEFAULT_PALETTE } from "@/lib/palettes";
 
 const EXAMPLES = ["debounce timer", "retry counter", "cache invalidation", "empty state"];
+// "surprise me" draws from a wider pool than the 4 visible chips, so it
+// actually feels random instead of picking between the same 4 every time.
+const SURPRISE_POOL = [
+  ...EXAMPLES,
+  "loading spinner",
+  "error boundary",
+  "rate limiter",
+  "feature flag",
+  "session token",
+  "api client",
+  "event emitter",
+  "queue worker",
+  "dark mode toggle",
+  "pagination cursor",
+  "websocket connection",
+  "form validator",
+  "auth middleware",
+  "file uploader",
+  "toast notification",
+  "undo stack",
+  "search index",
+  "background job",
+];
 const LANGUAGES = [
   { label: "any", value: "" },
   { label: "js", value: "javascript" },
@@ -131,7 +154,7 @@ export default function MaximalistTheme() {
                 </button>
               ))}
               <button
-                onClick={() => s.runExample(EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)])}
+                onClick={() => s.runExample(SURPRISE_POOL[Math.floor(Math.random() * SURPRISE_POOL.length)])}
                 className="rounded-2xl bg-foreground/10 px-4 py-2 text-sm font-bold text-foreground transition-transform hover:scale-105 hover:bg-foreground/20"
               >
                 🎲 surprise me
