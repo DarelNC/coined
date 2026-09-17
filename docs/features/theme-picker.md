@@ -8,7 +8,7 @@ Four color palettes for the Maximalist theme — Grape (default), Sunset, Forest
 
 ## Correction: this isn't what got built first
 
-The first pass misread "theme picker" as switching between the three *different UI/UX styles* explored earlier (Maximalist/Editorial/Brutalist) — built and shipped that, then the user corrected it: they meant color palettes *within* Maximalist specifically, not a switcher between entirely different designs. Reverted `app/page.js` back to rendering only `MaximalistTheme`; the Editorial/Brutalist components stay in `app/themes/` (unreferenced, not deleted — real work, might come back as a separate "layout" dimension later) but nothing in the UI currently links to them.
+The first pass misread "theme picker" as switching between the three *different UI/UX styles* explored earlier (Maximalist/Editorial/Brutalist) — built and shipped that, then the user corrected it: they meant color palettes *within* Maximalist specifically, not a switcher between entirely different designs. Reverted `app/page.js` back to rendering only `MaximalistTheme`. The Editorial/Brutalist components were removed from the tree entirely (unreferenced dead code with no visible explanation on the README isn't worth carrying) — still fully recoverable from git history (commit `a6ee840`) if that "different layout" direction comes back later.
 
 ## Implementation
 
