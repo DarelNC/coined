@@ -2,12 +2,7 @@
 
 **How do other developers name this?** Type what you're trying to name — search real, public code, get back the actual variable/function names people used, grouped by repo and language.
 
-<!--
-TODO: add a real screenshot here, e.g.
 ![Coined search results](docs/screenshot.png)
-Run the app (npm run dev), search something like "retry counter",
-screenshot the results, save it as docs/screenshot.png, commit it.
--->
 
 ## Why
 
